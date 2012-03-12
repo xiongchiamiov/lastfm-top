@@ -9,9 +9,11 @@ require 'net/http'
 require 'optparse'
 require 'uri'
 
-PERIOD_OPTIONS = ['7day', '3month', '6month', '12month', :overall]
+PERIOD_OPTIONS = ['7day', '3month', '6month', '12month', 'overall']
+STAT_OPTIONS = ['artists', 'albums', 'tracks']
 API_KEY = 'c7089003368bef3c8d0dd12ceede4978'
 period = 'overall'
+statistic = 'artists'
 limit = 10
 
 OptionParser.new do |opts|
@@ -29,6 +31,11 @@ OptionParser.new do |opts|
 		period = p
 	end
 	
+	opts.on('-s', '--statistic STATISTIC', STAT_OPTIONS,
+	        "Statistic to show.  Choices: #{STAT_OPTIONS.join(',')}") do |s|
+		statistic = s
+	end
+	
 	opts.on('-v', '--version', 'Show the installed version of lastfm-top.') do
 		puts 'lastfm-top 0.1.0'
 		exit 0
@@ -42,7 +49,7 @@ end.parse!
 
 user = ARGV[-1] || 'xiongchiamiov'
 
-url = URI.parse("http://ws.audioscrobbler.com/2.0/?api_key=#{API_KEY}&format=json&method=user.gettopartists&user=#{user}&period=#{period}&limit=#{limit}")
+url = URI.parse("http://ws.audioscrobbler.com/2.0/?api_key=#{API_KEY}&format=json&method=user.gettop#{statistic}&user=#{user}&period=#{period}&limit=#{limit}")
 json = Net::HTTP.get_response(url).body
 results = JSON.parse(json)
 
@@ -51,8 +58,10 @@ if results['error']
 	exit results['error']
 end
 
-artists = results['topartists']['artist']
-artists.each do |artist|
-	puts "#{artist['name']} - #{artist['playcount']}"
+stats = results["top#{statistic}"][statistic.chop] # Chop off the 's'
+stats.each do |stat|
+	# This could look a lot nicer.  There's also some additional information
+	# available that differs depending on the statistic we're looking at.
+	puts "#{stat['name']} - #{stat['playcount']}"
 end
 
