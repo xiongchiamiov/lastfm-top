@@ -18,40 +18,47 @@ statistic = 'artists'
 limit = 10
 autoTranslate = true
 
-OptionParser.new do |opts|
-	opts.banner = "Usage: #{$0.split('/').last} [options] [USER]"
-	
-	opts.on('-l', '--limit NUM', Integer, 'Number of artists to show.  '\
-	                                     +'0 is all.  Defaults to 10.') do |num|
-		# We should actually restrict the range a bit.  Using a really, really
-		# big number causes the API to return no tracks at all.
-		limit = num
-	end
-	
-	opts.on('--no-translate', "Don't auto-translate foreign artist names.") do
-		autoTranslate = false
-	end
-	
-	opts.on('-p', '--period PERIOD', PERIOD_OPTIONS,
-	        "Time period to show.  Choices: #{PERIOD_OPTIONS.join(',')}") do |p|
-		period = p
-	end
-	
-	opts.on('-s', '--statistic STATISTIC', STAT_OPTIONS,
-	        "Statistic to show.  Choices: #{STAT_OPTIONS.join(',')}") do |s|
-		statistic = s
-	end
-	
-	opts.on('-v', '--version', 'Show the installed version of lastfm-top.') do
-		puts 'lastfm-top 0.1.0'
-		exit 0
-	end
-	
-	opts.on_tail('-h', '--help', 'Show this help dialog.') do
-		puts opts
-		exit 0
-	end
-end.parse!
+begin
+	OptionParser.new do |opts|
+		opts.banner = "Usage: #{$0.split('/').last} [options] [USER]"
+		
+		opts.on('-l', '--limit NUM', Integer, 'Number of artists to show.  '\
+											 +'0 is all.  Defaults to 10.') do |num|
+			# We should actually restrict the range a bit.  Using a really, really
+			# big number causes the API to return no tracks at all.
+			limit = num
+		end
+		
+		opts.on('--no-translate', "Don't auto-translate foreign artist names.") do
+			autoTranslate = false
+		end
+		
+		opts.on('-p', '--period PERIOD', PERIOD_OPTIONS,
+				"Time period to show.  Choices: #{PERIOD_OPTIONS.join(',')}") do |p|
+			period = p
+		end
+		
+		opts.on('-s', '--statistic STATISTIC', STAT_OPTIONS,
+				"Statistic to show.  Choices: #{STAT_OPTIONS.join(',')}") do |s|
+			statistic = s
+		end
+		
+		opts.on('-v', '--version', 'Show the installed version of lastfm-top.') do
+			puts 'lastfm-top 0.1.0'
+			exit 0
+		end
+		
+		opts.on_tail('-h', '--help', 'Show this help dialog.') do
+			puts opts
+			exit 0
+		end
+	end.parse!
+rescue OptionParser::InvalidArgument,
+       OptionParser::InvalidOption,
+       OptionParser::MissingArgument => e
+	puts e
+	exit 255
+end
 
 user = ARGV[-1] || 'xiongchiamiov'
 
