@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.email = ['xiong.chiamiov@gmail.com']
   
   s.add_dependency 'json'
+  s.add_dependency 'englify'
   
   s.files = %w( COPYING Rakefile README.md )
   s.files += Dir.glob "bin/*"

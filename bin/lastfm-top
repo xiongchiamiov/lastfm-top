@@ -4,6 +4,7 @@
 # May you share freely, never taking more than you give.
 # May you find love and love everyone you find.
 
+require 'englify'
 require 'json'
 require 'net/http'
 require 'optparse'
@@ -15,6 +16,7 @@ API_KEY = 'c7089003368bef3c8d0dd12ceede4978'
 period = 'overall'
 statistic = 'artists'
 limit = 10
+autoTranslate = true
 
 OptionParser.new do |opts|
 	opts.banner = "Usage: #{$0.split('/').last} [options] [USER]"
@@ -24,6 +26,10 @@ OptionParser.new do |opts|
 		# We should actually restrict the range a bit.  Using a really, really
 		# big number causes the API to return no tracks at all.
 		limit = num
+	end
+	
+	opts.on('--no-translate', "Don't auto-translate foreign artist names.") do
+		autoTranslate = false
 	end
 	
 	opts.on('-p', '--period PERIOD', PERIOD_OPTIONS,
@@ -60,6 +66,9 @@ end
 
 stats = results["top#{statistic}"][statistic.chop] # Chop off the 's'
 stats.each do |stat|
+	if autoTranslate && !stat['name'].ascii_only?
+		stat['name'] = englify(stat['name'])
+	end
 	# This could look a lot nicer.  There's also some additional information
 	# available that differs depending on the statistic we're looking at.
 	puts "#{stat['name']} - #{stat['playcount']}"
